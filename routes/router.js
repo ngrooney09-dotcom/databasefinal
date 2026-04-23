@@ -1,110 +1,97 @@
 const express = require("express");
-const path = require("path");
-const db = require("./db"); // <-- change if your connection file name is different
+const router = express.Router();
+const database = include('databaseConnection');
 
-const app = express();
+router.get("/", async (req, res) => {
+try {
+const [items] = await database.query("SELECT * FROM purchase_item");
 
-app.set("view engine", "ejs");
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public")));
+```
+res.render("index", {
+  items,
+  total: 0,
+  count: items.length
+});
+```
 
-
-
-app.get("/", async (req, res) => {
-  try {
-    const [items] = await db.query("SELECT * FROM purchase_item");
-
-    const [summary] = await db.query(`
-      SELECT 
-        IFNULL(SUM(cost * quantity), 0) AS total_cost,
-        COUNT(*) AS total_items
-      FROM purchase_item
-    `);
-
-    res.render("index", {
-      items,
-      total: summary[0].total_cost,
-      count: summary[0].total_items
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.send("Error loading page");
-  }
+} catch (err) {
+console.log(err);
+res.send("Error loading page");
+}
 });
 
+router.post("/add", async (req, res) => {
+const { name, description, cost, quantity } = req.body;
 
-
-app.post("/add", async (req, res) => {
-  const { name, description, cost, quantity } = req.body;
-
-  try {
-    await db.query(
-      `INSERT INTO purchase_item 
+try {
+await database.query(
+`INSERT INTO purchase_item 
        (item_name, item_description, cost, quantity) 
        VALUES (?, ?, ?, ?)`,
-      [name, description, cost, quantity]
-    );
+[name, description, cost, quantity]
+);
 
-    res.redirect("/");
-  } catch (err) {
-    console.error(err);
-    res.send("Error adding item");
-  }
+```
+res.redirect("/");
+```
+
+} catch (err) {
+console.log(err);
+res.send("Error adding item");
+}
 });
 
+router.post("/delete/:id", async (req, res) => {
+try {
+await database.query(
+"DELETE FROM purchase_item WHERE purchase_item_id = ?",
+[req.params.id]
+);
 
+```
+res.redirect("/");
+```
 
-app.post("/delete/:id", async (req, res) => {
-  try {
-    await db.query(
-      "DELETE FROM purchase_item WHERE purchase_item_id = ?",
-      [req.params.id]
-    );
-
-    res.redirect("/");
-  } catch (err) {
-    console.error(err);
-    res.send("Error deleting item");
-  }
+} catch (err) {
+console.log(err);
+res.send("Error deleting item");
+}
 });
 
+router.post("/increase/:id", async (req, res) => {
+try {
+await database.query(
+"UPDATE purchase_item SET quantity = quantity + 1 WHERE purchase_item_id = ?",
+[req.params.id]
+);
 
+```
+res.redirect("/");
+```
 
-app.post("/increase/:id", async (req, res) => {
-  try {
-    await db.query(
-      "UPDATE purchase_item SET quantity = quantity + 1 WHERE purchase_item_id = ?",
-      [req.params.id]
-    );
-
-    res.redirect("/");
-  } catch (err) {
-    console.error(err);
-    res.send("Error increasing quantity");
-  }
+} catch (err) {
+console.log(err);
+res.send("Error increasing quantity");
+}
 });
 
-
-
-app.post("/decrease/:id", async (req, res) => {
-  try {
-    await db.query(
-      `UPDATE purchase_item 
+router.post("/decrease/:id", async (req, res) => {
+try {
+await database.query(
+`UPDATE purchase_item 
        SET quantity = quantity - 1 
        WHERE purchase_item_id = ? AND quantity > 0`,
-      [req.params.id]
-    );
+[req.params.id]
+);
 
-    res.redirect("/");
-  } catch (err) {
-    console.error(err);
-    res.send("Error decreasing quantity");
-  }
+```
+res.redirect("/");
+```
+
+} catch (err) {
+console.log(err);
+res.send("Error decreasing quantity");
+}
 });
 
-
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+module.exports = router;
