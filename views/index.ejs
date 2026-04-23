@@ -1,101 +1,105 @@
+
 <!DOCTYPE html>
+
 <html>
-<head>
-  <meta charset="utf-8"/>
-  <link rel="stylesheet" href="bulma.min.css">
-  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
-</head>
+	<head>
+		<meta charset="utf-8"/>
+		<link rel="stylesheet" href="bulma.min.css">
+		<script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+	</head>
+	<body>
+		<section class="section">
+			<div class="maincolumns columns is-desktop is-vcentered">
+				<div class="column is-10 is-offset-1 notification is-info is-light box container">
 
-<body>
-<section class="section">
-  <div class="columns is-centered">
-    <div class="column is-10 box">
+```
+				<div class="title">
+					Purchase Items
+				</div>
 
-      <h1 class="title">Purchase Items</h1>
 
-      <form action="/add" method="POST">
-        <div class="field is-grouped">
-          <p class="control is-expanded">
-            <input class="input" name="name" placeholder="Item Name" required>
-          </p>
-          <p class="control is-expanded">
-            <input class="input" name="description" placeholder="Description" required>
-          </p>
-          <p class="control">
-            <input class="input" name="cost" step="0.0001" placeholder="Cost" required>
-          </p>
-          <p class="control">
-            <input class="input" type="number" name="quantity" placeholder="Qty" required>
-          </p>
-          <p class="control">
-            <button class="button is-primary">Add +</button>
-          </p>
-        </div>
-      </form>
+				<% if (locals.items) { %>
+					<div class="table-container">
+					<table class="table is-bordered is-hoverable is-striped is-narrow">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Description</th>
+								<th>Cost</th>
+								<th>Quantity</th>
+								<th></th>
+								<th></th>
+								<th></th>
+							</tr>
+						</thead>
 
-      <% if (items && items.length > 0) { %>
-      <div class="table-container">
-        <table class="table is-striped is-hoverable is-fullwidth">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Cost</th>
-              <th>Quantity</th>
-              <th></th>
-              <th></th>
-              <th></th>
-            </tr>
-          </thead>
+						<% for(let i = 0; i < items.length; i++) { %>
+						<tr>
+							<td><%= items[i].item_name %></td>
+							<td><%= items[i].item_description %></td>
+							<td><%= items[i].cost %></td>
+							<td><%= items[i].quantity %></td>
 
-          <tbody>
-          <% for(let i = 0; i < items.length; i++) { %>
-            <tr>
-              <td><%= items[i].item_name %></td>
-              <td><%= items[i].item_description %></td>
-              <td><%= items[i].cost %></td>
-              <td><%= items[i].quantity %></td>
+							<td>
+								<form action="/increase/<%= items[i].purchase_item_id %>" method="POST">
+									<button type="submit" class="button is-small">
+										<i class="fas fa-caret-square-up"></i>
+									</button>
+								</form>
+							</td>
 
-              <td>
-                <form action="/increase/<%= items[i].purchase_item_id %>" method="POST">
-                  <button class="button is-small">
-                    <i class="fas fa-caret-square-up"></i>
-                  </button>
-                </form>
-              </td>
+							<td>
+								<form action="/decrease/<%= items[i].purchase_item_id %>" method="POST">
+									<button type="submit" class="button is-small">
+										<i class="fas fa-caret-square-down"></i>
+									</button>
+								</form>
+							</td>
 
-              <td>
-                <form action="/decrease/<%= items[i].purchase_item_id %>" method="POST">
-                  <button class="button is-small">
-                    <i class="fas fa-caret-square-down"></i>
-                  </button>
-                </form>
-              </td>
+							<td>
+								<form action="/delete/<%= items[i].purchase_item_id %>" method="POST">
+									<button type="submit" class="button is-danger is-small">
+										<i class="fas fa-trash"></i>
+									</button>
+								</form>
+							</td>
+						</tr>
+						<% } %>
 
-              <td>
-                <form action="/delete/<%= items[i].purchase_item_id %>" method="POST">
-                  <button class="button is-danger is-small">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </form>
-              </td>
-            </tr>
-          <% } %>
-          </tbody>
+						<tfoot>
+							<tr>
+								<td colspan="7">
+									There are <%= count %> items for a total of $<%= Number(total).toFixed(2) %>.
+								</td>
+							</tr>
+						</tfoot>
+					</table>
+					</div>
+				<% } %>
+				<form action="/add" method="POST" class="mb-4">
+					<div class="field is-grouped">
+						<p class="control">
+							<input class="input" name="name" placeholder="Item Name" required>
+						</p>
+						<p class="control">
+							<input class="input" name="description" placeholder="Description" required>
+						</p>
+						<p class="control">
+							<input class="input" name="cost" step="0.0001" placeholder="Cost" required>
+						</p>
+						<p class="control">
+							<input class="input" type="number" name="quantity" placeholder="Quantity" required>
+						</p>
+						<p class="control">
+							<button class="button is-primary" type="submit">Add +</button>
+						</p>
+					</div>
+				</form>
 
-          <tfoot>
-            <tr>
-              <td colspan="7">
-                There are <%= count %> items for a total of $<%= Number(total).toFixed(2) %>.
-              </td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-      <% } %>
-
-    </div>
-  </div>
-</section>
+			</div>
+		</div>
+	</section>
 </body>
+```
+
 </html>
